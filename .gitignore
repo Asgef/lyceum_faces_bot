@@ -1,0 +1,11 @@
+*.egg-info
+__pycache__
+dist/
+*.pyc
+.venv/
+.idea/
+.env
+*.log
+
+*.ipynb
+db.sqlite3
