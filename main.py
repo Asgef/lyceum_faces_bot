@@ -4,6 +4,8 @@ import logging
 from pathlib import Path
 import os
 import pprint  # Тот же принт, но структурирующий вывод
+# Данные из базы данных
+from db import universities, questions,question_order
 
 
 # Настройки проекта
@@ -28,7 +30,7 @@ if DEBUG:
     )
 
 
-# Обрабатываем команду /start и обрабатываем её
+# Обрабатываем команду /start
 @bot.message_handler(commands=['start'])
 def start(message):
     # Исследуем объект message.
@@ -113,6 +115,9 @@ def graduates(message):
         message_text,
         reply_markup=markup
     )
+
+
+
 
 
 # Вызываем бота. Он запускается и ждёт команду.

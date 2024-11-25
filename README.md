@@ -29,12 +29,13 @@
 10. Проверяем бота в телеграмме.
 
 ### Дополнительная информация
-[Официальная документация](https://pytba.readthedocs.io/ru/latest/sync_version/index.html)
+[Официальная документация для telebot](https://pytba.readthedocs.io/ru/latest/sync_version/index.html)
+
 https://habr.com/ru/articles/580408/
 
 
 ### Python
-#Объекты #Классы #Константы #Декораторы #f_строки #\n_перенос_строк #Контекстный_менеджер_with
+#Объекты #Классы #Константы #Декораторы #f_строки #\n_перенос_строк #Контекстный_менеджер_with #lambda_функции
 
 ### Текст
 
