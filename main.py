@@ -1,16 +1,43 @@
-# This is a sample Python script.
+#!/usr/bin/env python
+from multiprocessing.util import DEBUG
 
-# Press Shift+F10 to execute it or replace it with your code.
-# Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
-
-
-def print_hi(name):
-    # Use a breakpoint in the code line below to debug your script.
-    print(f'Hi, {name}')  # Press Ctrl+F8 to toggle the breakpoint.
+import telebot
+import logging
+import pprint
 
 
-# Press the green button in the gutter to run the script.
-if __name__ == '__main__':
-    print_hi('PyCharm')
+# Настройки проекта
+TOKEN = ''
+DEBUG = True  # Включить логирование
 
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
+
+# Создаем объект бота и передаём ему токен регистрации в телеграмм.
+bot = telebot.TeleBot(TOKEN)
+
+
+# Настройки логирования. Для отладки и исследования.
+if DEBUG:
+    logging.basicConfig(
+        level=logging.INFO,  # Устанавливаем уровень логирования
+        format="%(asctime)s - %(levelname)s - %(message)s",  # Формат сообщений
+        datefmt="%Y-%m-%d %H:%M:%S"  # Формат даты
+    )
+
+
+# Перехватываем команду /start и обрабатываем её
+@bot.message_handler(commands=['start'])
+def start(message):
+    # Исследуем объект message.
+    logging.info(pprint.pformat(message.from_user.__dict__))
+
+    # Сохраняем имя пользователя в переменную и отвечаем ему.
+    user_name = message.from_user.first_name
+    bot.send_message(
+        message.chat.id,
+        f'Привет, {user_name}! \n'
+        f'Здесь ты узнаешь истории выпускников лицея 1580'
+    )
+
+
+# Вызываем бота. Он запускается и ждёт команду.
+bot.infinity_polling()
