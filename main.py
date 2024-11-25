@@ -1,11 +1,13 @@
 #!/usr/bin/env python
 from telebot import TeleBot, types
-import logging
+
+import logging # Для логирования, выводит в консоль необходимые сообщения, помогает в отладке.
+
 from pathlib import Path
-import os
+import os  # Помогает сформировать пути до файлов
 import pprint  # Тот же принт, но структурирующий вывод
 # Данные из базы данных
-from db import universities, questions,question_order
+from db import universities, questions,question_order # Имитируем базу данных
 import time  # Для задержки между отправкой сообщений
 
 
@@ -67,7 +69,7 @@ def start(message):
 # Обрабатываем кнопку "О проекте"
 @bot.message_handler(func=lambda message: message.text == "О проекте", content_types=['text'])
 def project_info(message):
-    # logging.info(message.text)
+    logging.info(message.text)
     # Подготавливаем сообщение
     # Текст. Применим Markdown
     message_text = '''
@@ -86,6 +88,7 @@ def project_info(message):
     photo_path = os.path.join(MEDIA_ROOT, 'shcool_1580_baner.webp')
     with open(photo_path, 'rb') as photo:
 
+        # Отправляем
         bot.send_photo(
             message.chat.id,
             photo=photo,
@@ -113,6 +116,7 @@ def graduates(message):
         )
         markup.add(button)
 
+    # Отправляем
     bot.send_message(
         message.chat.id,
         message_text,
@@ -141,7 +145,9 @@ def handle_university_selection(call):
     photo_path = os.path.join(MEDIA_ROOT, university['photo'])
 
     # Отправляем фотографию университета и кнопки выпускников
-    with open(photo_path, 'rb') as photo:
+    with open(photo_path, 'rb') as photo: # Загружаем файл в контекстном менеджере
+
+        # Отправляем
         bot.send_photo(
             call.message.chat.id,
             photo=photo,
@@ -156,11 +162,12 @@ def handle_graduate_selection(call):
     _, university_key, graduate_key = call.data.split('_', 2)
     graduate = universities[university_key]['graduates'][graduate_key]
 
+    # Сообщение получается слишком длиным, телеграм ругается, поэтому делим его на части
     # Разбиваем вопросы-ответы на три части
     parts = [
         question_order[:5],  # Первые 5 вопросов
         question_order[5:10],  # С 6 по 10 вопрос
-        question_order[10:]  # С 11 по 15 вопрос
+        question_order[10:]  # С 11 по 16 вопрос
     ]
 
     # Отправляем первое сообщение с фото и короткой подписью
@@ -188,10 +195,18 @@ def handle_graduate_selection(call):
             message_text,
             parse_mode="Markdown"
         )
-        time.sleep(2)  # Задержка между сообщениями
-
-
+        time.sleep(3)  # Задержка между сообщениями
 
 
 # Вызываем бота. Он запускается и ждёт команду.
-bot.infinity_polling()
+
+
+# Может произойти ошибка, бот остановится и не запустится.
+# Для этого запускаем бота в бесконечном цикле в блоке try_except.
+# Если бот упал, то он перезапустится через 5 секунд
+while True:
+    try:
+        bot.polling(none_stop=True)
+    except Exception as e:
+        print(f"Произошла ошибка: {e}")
+        time.sleep(5)  # Задержка перед перезапуском
