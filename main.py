@@ -28,11 +28,11 @@ if DEBUG:
     )
 
 
-# Перехватываем команду /start и обрабатываем её
+# Обрабатываем команду /start и обрабатываем её
 @bot.message_handler(commands=['start'])
 def start(message):
     # Исследуем объект message.
-    logging.info(pprint.pformat(message.from_user.__dict__))
+    # logging.info(pprint.pformat(message.from_user.__dict__))
 
     # Сохраняем имя пользователя в переменную.
     user_name = message.from_user.first_name
@@ -41,7 +41,7 @@ def start(message):
     # текст
     message_text = (
         f'Привет, {user_name}! \n'
-        f'Здесь ты узнаешь истории выпускников лицея 1580'
+        f'Здесь ты узнаешь истории наших выпускников'
     ),
     # Картинка
     photo_path = os.path.join(MEDIA_ROOT, 'shcool_1580_logo.png')
@@ -61,7 +61,35 @@ def start(message):
             reply_markup=markup
         )
 
-# @bot.message_handler()
+# Обрабатываем кнопку "О проекте"
+@bot.message_handler(content_types=['text'])
+def project_info(message):
+    logging.info(message.text)
+    if message.text == "О проекте":
+        # Подготавливаем сообщение
+        # Текст. Применим Markdown
+        message_text = '''
+        *Проект "Вектор Выбора Пути"*
+
+        Проект создан для того, чтобы поделиться реальными историями выпускников лицея 1580. 
+
+        Мы собираем _вдохновляющие истории_, которые помогут нынешним и будущим лицеистам:
+        - сделать осознанный выбор,
+        - узнать о возможных трудностях и успехах, которые ожидают их на пути.
+
+        Это место, где выпускники могут поделиться своим опытом, а нынешние ученики — найти *полезные советы* и поддержку.
+        '''
+
+        # Картинка
+        photo_path = os.path.join(MEDIA_ROOT, 'shcool_1580_baner.webp')
+        with open(photo_path, 'rb') as photo:
+
+            bot.send_photo(
+                message.chat.id,
+                photo=photo,
+                caption=message_text,
+                parse_mode="Markdown"
+            )
 
 
 # Вызываем бота. Он запускается и ждёт команду.
