@@ -1,13 +1,13 @@
 #!/usr/bin/env python
 from telebot import TeleBot, types
 import logging
-import pprint
 from pathlib import Path
 import os
+import pprint  # Тот же принт, но структурирующий вывод
 
 
 # Настройки проекта
-TOKEN = ''
+TOKEN = '...'
 DEBUG = True  # Включить логирование
 
 # Определяем пути до базовой директории проекта и директории с медиафайлами
@@ -62,34 +62,57 @@ def start(message):
         )
 
 # Обрабатываем кнопку "О проекте"
-@bot.message_handler(content_types=['text'])
+@bot.message_handler(func=lambda message: message.text == "О проекте", content_types=['text'])
 def project_info(message):
+    # logging.info(message.text)
+    # Подготавливаем сообщение
+    # Текст. Применим Markdown
+    message_text = '''
+    *Проект "Вектор Выбора Пути"*
+
+    Проект создан для того, чтобы поделиться реальными историями выпускников лицея 1580. 
+
+    Мы собираем _вдохновляющие истории_, которые помогут нынешним и будущим лицеистам:
+    - сделать осознанный выбор,
+    - узнать о возможных трудностях и успехах, которые ожидают их на пути.
+
+    Это место, где выпускники могут поделиться своим опытом, а нынешние ученики — найти *полезные советы* и поддержку.
+    '''
+
+    # Картинка
+    photo_path = os.path.join(MEDIA_ROOT, 'shcool_1580_baner.webp')
+    with open(photo_path, 'rb') as photo:
+
+        bot.send_photo(
+            message.chat.id,
+            photo=photo,
+            caption=message_text,
+            parse_mode="Markdown"
+        )
+
+
+# Обрабатываем кнопку "Наши выпускники"
+@bot.message_handler(func=lambda message: message.text == "Наши выпускники", content_types=['text'])
+def graduates(message):
     logging.info(message.text)
-    if message.text == "О проекте":
-        # Подготавливаем сообщение
-        # Текст. Применим Markdown
-        message_text = '''
-        *Проект "Вектор Выбора Пути"*
+    message_text = '''
+        Наши выпускники поступают в ведущие учебные заведения страны.
+        Узнай их истории.
+    '''
+    # Подготавливаем инлайн кнопки
+    markup = types.InlineKeyboardMarkup(row_width=1)
+    item1 = types.InlineKeyboardButton("Все выпускники", callback_data="all_graduates")
+    item2 = types.InlineKeyboardButton("2022", callback_data="2022")
+    item3 = types.InlineKeyboardButton("2021", callback_data="2021")
+    item4 = types.InlineKeyboardButton("2020", callback_data="2020")
+    item5 = types.InlineKeyboardButton("2019", callback_data="2019")
+    markup.add(item1, item2, item3, item4, item5)
 
-        Проект создан для того, чтобы поделиться реальными историями выпускников лицея 1580. 
-
-        Мы собираем _вдохновляющие истории_, которые помогут нынешним и будущим лицеистам:
-        - сделать осознанный выбор,
-        - узнать о возможных трудностях и успехах, которые ожидают их на пути.
-
-        Это место, где выпускники могут поделиться своим опытом, а нынешние ученики — найти *полезные советы* и поддержку.
-        '''
-
-        # Картинка
-        photo_path = os.path.join(MEDIA_ROOT, 'shcool_1580_baner.webp')
-        with open(photo_path, 'rb') as photo:
-
-            bot.send_photo(
-                message.chat.id,
-                photo=photo,
-                caption=message_text,
-                parse_mode="Markdown"
-            )
+    bot.send_message(
+        message.chat.id,
+        message_text,
+        reply_markup=markup
+    )
 
 
 # Вызываем бота. Он запускается и ждёт команду.
