@@ -6,6 +6,7 @@ import os
 import pprint  # Тот же принт, но структурирующий вывод
 # Данные из базы данных
 from db import universities, questions,question_order
+import time  # Для задержки между отправкой сообщений
 
 
 # Настройки проекта
@@ -118,6 +119,76 @@ def graduates(message):
         reply_markup=markup
     )
 
+
+# Обрабатываем инлайн кнопки для университета
+@bot.callback_query_handler(func=lambda call: call.data.startswith('university_'))
+def handle_university_selection(call):
+    # Извлекаем ключ университета
+    university_key = call.data[len('university_'):]
+    university = universities[university_key]
+    graduates = university['graduates']
+
+    # Создаем инлайн-кнопки для выпускников
+    markup = types.InlineKeyboardMarkup(row_width=1)
+    for grad_key, grad_info in graduates.items():
+        button = types.InlineKeyboardButton(
+            grad_info['name'],
+            callback_data=f'graduate_{university_key}_{grad_key}'
+        )
+        markup.add(button)
+
+    # Путь к фотографии университета
+    photo_path = os.path.join(MEDIA_ROOT, university['photo'])
+
+    # Отправляем фотографию университета и кнопки выпускников
+    with open(photo_path, 'rb') as photo:
+        bot.send_photo(
+            call.message.chat.id,
+            photo=photo,
+            caption=f"Выпускники из {university['name']}:",
+            reply_markup=markup
+        )
+
+# Обрабатываем инлайн кнопки для выпускника
+@bot.callback_query_handler(func=lambda call: call.data.startswith('graduate_'))
+def handle_graduate_selection(call):
+    # Извлекаем ключи университета и выпускника
+    _, university_key, graduate_key = call.data.split('_', 2)
+    graduate = universities[university_key]['graduates'][graduate_key]
+
+    # Разбиваем вопросы-ответы на три части
+    parts = [
+        question_order[:5],  # Первые 5 вопросов
+        question_order[5:10],  # С 6 по 10 вопрос
+        question_order[10:]  # С 11 по 15 вопрос
+    ]
+
+    # Отправляем первое сообщение с фото и короткой подписью
+    photo_path = os.path.join(MEDIA_ROOT, graduate['photo'])
+    with open(photo_path, 'rb') as photo:
+        bot.send_photo(
+            call.message.chat.id,
+            photo=photo,
+            caption=f"*Имя:* {graduate['name']}",
+            parse_mode="Markdown"
+        )
+
+    # Небольшая задержка перед отправкой текстовых сообщений
+    time.sleep(2)
+
+    # Отправляем три текстовых сообщения с вопросами-ответами
+    for part in parts:
+        message_text = ""
+        for q_id in part:
+            question = questions[q_id]
+            answer = graduate['answers'][q_id]
+            message_text += f"*Вопрос:* {question}\n*Ответ:* {answer}\n\n"
+        bot.send_message(
+            call.message.chat.id,
+            message_text,
+            parse_mode="Markdown"
+        )
+        time.sleep(2)  # Задержка между сообщениями
 
 
 
