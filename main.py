@@ -101,14 +101,16 @@ def graduates(message):
         Наши выпускники поступают в ведущие учебные заведения страны.
         Узнай их истории.
     '''
-    # Подготавливаем инлайн кнопки
+
+    # Подготавливаем инлайн-кнопки университетов.
+    # Для каждого университета создаем инлайн-кнопку в цикле.
     markup = types.InlineKeyboardMarkup(row_width=1)
-    item1 = types.InlineKeyboardButton("Все выпускники", callback_data="all_graduates")
-    item2 = types.InlineKeyboardButton("2022", callback_data="2022")
-    item3 = types.InlineKeyboardButton("2021", callback_data="2021")
-    item4 = types.InlineKeyboardButton("2020", callback_data="2020")
-    item5 = types.InlineKeyboardButton("2019", callback_data="2019")
-    markup.add(item1, item2, item3, item4, item5)
+    for uni_key, uni_info in universities.items():
+        button = types.InlineKeyboardButton(
+            uni_info['name'],
+            callback_data=f'university_{uni_key}'
+        )
+        markup.add(button)
 
     bot.send_message(
         message.chat.id,
